@@ -29,8 +29,10 @@ func keepSessionFromContext(ctx context.Context) bool {
 }
 
 type ClientOptions struct {
-	Password                 string
-	ClientMetadata           string
+	Password string
+	// ClientMetadata defaults to DefaultClientMetadata when nil. A pointer to an
+	// empty string sends client= without software identification.
+	ClientMetadata           *string
 	DialOut                  DialOutFunc
 	IdleSessionCheckInterval time.Duration
 	IdleSessionTimeout       time.Duration
@@ -72,7 +74,7 @@ func NewClient(options ClientOptions) (*Client, error) {
 	}
 	client := &Client{
 		password:          sha256.Sum256([]byte(options.Password)),
-		clientMetadata:    options.ClientMetadata,
+		clientMetadata:    DefaultClientMetadata,
 		dialOut:           options.DialOut,
 		logger:            options.Logger,
 		idleCheckInterval: options.IdleSessionCheckInterval,
@@ -83,6 +85,9 @@ func NewClient(options ClientOptions) (*Client, error) {
 	}
 	if client.logger == nil {
 		client.logger = logger.NOP()
+	}
+	if options.ClientMetadata != nil {
+		client.clientMetadata = *options.ClientMetadata
 	}
 	if client.idleCheckInterval <= minimumIdleSessionInterval {
 		client.idleCheckInterval = defaultIdleSessionCheckInterval

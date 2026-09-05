@@ -56,3 +56,7 @@ var (
 )
 
 type DialOutFunc = func(ctx context.Context) (net.Conn, error)
+
+// DefaultClientMetadata preserves the legacy client identity for compatibility.
+// It is not the version of this rewritten implementation.
+const DefaultClientMetadata = "sing-anytls/0.0.13"
