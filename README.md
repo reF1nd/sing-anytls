@@ -23,6 +23,12 @@ library through 0.0.13: padding updates, large-write frame splitting, disabling
 session reuse, and sending FIN before releasing/closing the session. Version
 0.0.12 added the reuse/close changes; 0.0.13 corrected the legacy version identifier.
 
+- `DisableReuse` closes the session after its stream closes, even when idle
+  retention or `ContextWithKeepSession` is requested.
+- `Reset` closes active and idle sessions without permanently closing the client.
+- `SetKeepIdleConnections`, `CloseIdleConnections`, and `ContextWithKeepSession`
+  retain SagerNet's on-demand idle-connection controls.
+
 The nested `test` module runs bidirectional interoperability against the official
 `github.com/anytls/sing-anytls v0.0.13`.
 
