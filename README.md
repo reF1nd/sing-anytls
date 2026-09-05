@@ -28,6 +28,11 @@ session reuse, and sending FIN before releasing/closing the session. Version
 - `Reset` closes active and idle sessions without permanently closing the client.
 - `SetKeepIdleConnections`, `CloseIdleConnections`, and `ContextWithKeepSession`
   retain SagerNet's on-demand idle-connection controls.
+- `ServiceOptions.FallbackHandler` works with both single-user and multi-user
+  services and receives the original, unconsumed authentication-failure data.
+  ALPN destination selection belongs to sing-box's TLS/inbound layer. As in the
+  existing implementation, a first read shorter than the password is sent to
+  fallback; authenticated padding read failures close the connection.
 
 The nested `test` module runs bidirectional interoperability against the official
 `github.com/anytls/sing-anytls v0.0.13`.
