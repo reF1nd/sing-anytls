@@ -33,9 +33,13 @@ session reuse, and sending FIN before releasing/closing the session. Version
   ALPN destination selection belongs to sing-box's TLS/inbound layer. As in the
   existing implementation, a first read shorter than the password is sent to
   fallback; authenticated padding read failures close the connection.
+- A dialer whose addresses are unavailable before its first write is supported.
+  TCP Fast Open socket setup and TLS negotiation belong to the caller; sing-box
+  tests exercise that full path separately.
 
 The nested `test` module runs bidirectional interoperability against the official
-`github.com/anytls/sing-anytls v0.0.13`.
+`github.com/anytls/sing-anytls v0.0.13`, as well as metadata wire, fallback byte
+preservation, reuse/idle-policy, reset, lazy-address, and existing stress tests.
 
 ```sh
 go test -race ./...
