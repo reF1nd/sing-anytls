@@ -3,7 +3,7 @@ module github.com/sagernet/sing-anytls/test
 go 1.24.0
 
 require (
-	github.com/anytls/sing-anytls v0.0.11
+	github.com/anytls/sing-anytls v0.0.13
 	github.com/sagernet/sing v0.8.14
 	github.com/sagernet/sing-anytls v0.0.0
 	github.com/stretchr/testify v1.11.1
