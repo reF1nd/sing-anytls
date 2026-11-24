@@ -461,12 +461,32 @@ func (s *session) lockWriteUntil(target *stream, limit *pipe.Deadline) error {
 	}
 }
 
-func (s *session) lockWrite() error {
+func (s *session) lockWriteUntilDeadline(deadline time.Time) error {
+	select {
+	case <-s.done:
+		return net.ErrClosed
+	default:
+	}
 	select {
 	case s.writeAccess <- struct{}{}:
 		return nil
 	case <-s.done:
 		return net.ErrClosed
+	default:
+	}
+	timeout := time.Until(deadline)
+	if timeout <= 0 {
+		return os.ErrDeadlineExceeded
+	}
+	timer := time.NewTimer(timeout)
+	defer timer.Stop()
+	select {
+	case s.writeAccess <- struct{}{}:
+		return nil
+	case <-s.done:
+		return net.ErrClosed
+	case <-timer.C:
+		return os.ErrDeadlineExceeded
 	}
 }
 
@@ -541,12 +561,14 @@ func (s *session) writeFrame(command byte, streamID uint32, data []byte) error {
 	frame := buf.NewSize(frameOverhead + len(data))
 	putFrameHeader(frame.Extend(frameOverhead), command, streamID, len(data))
 	common.Must1(frame.Write(data))
-	s.conn.SetWriteDeadline(time.Now().Add(controlFrameWriteTimeout))
-	err := s.lockWrite()
+	deadline := time.Now().Add(controlFrameWriteTimeout)
+	err := s.lockWriteUntilDeadline(deadline)
 	if err != nil {
 		frame.Release()
+		s.Close()
 		return err
 	}
+	s.conn.SetWriteDeadline(deadline)
 	err = s.writeLocked(frame)
 	if err == nil {
 		s.conn.SetWriteDeadline(time.Time{})
